@@ -38,9 +38,9 @@ public class DriveWithJoysticks extends CommandBase {
     this.rotation = rotation;
     this.relative = relative;
     this.maxSpeed = maxSpeed;
-    this.xLimiter = new SlewRateLimiter(0.0);
-    this.yLimiter = new SlewRateLimiter(0.0);
-    this.turnLimiter = new SlewRateLimiter(0.0);
+    this.xLimiter = new SlewRateLimiter(100.0);
+    this.yLimiter = new SlewRateLimiter(100.0);
+    this.turnLimiter = new SlewRateLimiter(100.0);
 
     addRequirements(swerveSubsystem);
   }
@@ -58,7 +58,7 @@ public class DriveWithJoysticks extends CommandBase {
       modifyAxis(translationX.getAsDouble(), maxSpeed.getAsDouble(), yLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,
       modifyAxis(translationY.getAsDouble(), maxSpeed.getAsDouble(), xLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,
       modifyAxis(rotation.getAsDouble(), maxSpeed.getAsDouble(), turnLimiter) * SwerveConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-     poseEstimator.getPoseRotation()));
+      poseEstimator.getPoseRotation()));
     } else {
       swerveSubsystem.drive(new ChassisSpeeds(
       modifyAxis(translationY.getAsDouble(), maxSpeed.getAsDouble(), yLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,

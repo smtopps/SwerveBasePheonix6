@@ -87,10 +87,10 @@ public class SwerveModule {
      * @param isOpenLoop If true it uses open loop control which sets the velocity using voltage. If false it uses closed loop which sets the velocity using a control method to vary motor power based on sensor velocity.
      */
     public void setDesiredState(SwerveModuleState desiredState){
-        desiredState = SwerveModuleState.optimize(desiredState, internalState.angle);
-        double angleToSet = desiredState.angle.getRotations();
+        var optimize = SwerveModuleState.optimize(desiredState, internalState.angle);
+        double angleToSet = optimize.angle.getRotations();
         angleMotor.setControl(angleSetter.withPosition(angleToSet));
-        double velocityToSet = desiredState.speedMetersPerSecond; //* ModuleConstants.rotationsPerMeter;
+        double velocityToSet = optimize.speedMetersPerSecond;
         SmartDashboard.putNumber(String.valueOf(moduleNumber) + "Request", velocityToSet);
         driveMotor.setControl(driveSetter.withVelocity(velocityToSet));
     }
@@ -105,7 +105,7 @@ public class SwerveModule {
 
         double angleToSetDeg = optimized.angle.getRotations();
         angleMotor.setControl(angleSetter.withPosition(angleToSetDeg));
-        double velocityToSet = optimized.speedMetersPerSecond; //* ModuleConstants.rotationsPerMeter;
+        double velocityToSet = optimized.speedMetersPerSecond;
         driveMotor.setControl(driveSetter.withVelocity(velocityToSet));
     }
 
@@ -175,7 +175,8 @@ public class SwerveModule {
         talongfxConfigs.CurrentLimits.SupplyCurrentThreshold = ModuleConstants.drivePeakCurrentLimit;
         talongfxConfigs.CurrentLimits.SupplyTimeThreshold = ModuleConstants.drivePeakCurrentDuration;
         talongfxConfigs.MotorOutput.Inverted = ModuleConstants.driveMotorInvert;
-        talongfxConfigs.MotorOutput.NeutralMode = ModuleConstants.driveNeutralMode;
+        //talongfxConfigs.MotorOutput.NeutralMode = ModuleConstants.driveNeutralMode;
+        talongfxConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         talongfxConfigs.Feedback.SensorToMechanismRatio = ModuleConstants.rotationsPerMeter;
         driveMotor.getConfigurator().apply(talongfxConfigs);
         driveMotor.setRotorPosition(0.0);

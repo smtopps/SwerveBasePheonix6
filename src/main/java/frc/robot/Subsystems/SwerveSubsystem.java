@@ -63,7 +63,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Speed", swerveModules[0].getMotorSpeed());
+    SmartDashboard.putNumber("0 Speed", swerveModules[0].getMotorSpeed());
+    SmartDashboard.putNumber("1 Speed", swerveModules[1].getMotorSpeed());
+    SmartDashboard.putNumber("2 Speed", swerveModules[2].getMotorSpeed());
+    SmartDashboard.putNumber("3 Speed", swerveModules[3].getMotorSpeed());
     SmartDashboard.putNumber("FL", swerveModules[0].getEncoderAngle().getRotations());
     SmartDashboard.putNumber("FR", swerveModules[1].getEncoderAngle().getRotations());
     SmartDashboard.putNumber("BL", swerveModules[2].getEncoderAngle().getRotations());
@@ -80,7 +83,6 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void drive(ChassisSpeeds chassisSpeeds) {
     SwerveModuleState[] states = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-    SmartDashboard.putNumber("FLangle", states[0].angle.getRotations());
     setModuleStates(states);
   }
 

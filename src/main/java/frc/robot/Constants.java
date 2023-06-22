@@ -45,23 +45,20 @@ public class Constants {
         public static final double angleKD = 0.5;
     
         // Drive Motor PID Values
-        public static final double driveKP = 0.0;
+        public static final double driveKP = 2.0;
         public static final double driveKI = 0.0;
         public static final double driveKD = 0.0;
     
         // Drive Motor Characterization Values
         public static final double driveKS = 0.2;
-        public static final double driveKV = 0.1;
-    
-        public static final double openLoopRamp = 0.0;
-        public static final double closedLoopRamp = 0.0;
+        public static final double driveKV = 2.0;
     
         // Angle Encoder Invert
-        public static final SensorDirectionValue canCoderInvert = SensorDirectionValue.Clockwise_Positive;
+        public static final SensorDirectionValue canCoderInvert = SensorDirectionValue.CounterClockwise_Positive;
     
         // Motor Inverts
-        public static final InvertedValue driveMotorInvert = InvertedValue.Clockwise_Positive;
-        public static final InvertedValue angleMotorInvert = InvertedValue.Clockwise_Positive;
+        public static final InvertedValue driveMotorInvert = InvertedValue.CounterClockwise_Positive;
+        public static final InvertedValue angleMotorInvert = InvertedValue.CounterClockwise_Positive;
     
         // Neutral Modes
         public static final NeutralModeValue angleNeutralMode = NeutralModeValue.Brake;
@@ -80,7 +77,8 @@ public class Constants {
   
         public static final double MAX_VOLTAGE = 12.0;
   
-        public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 * ((14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)) * 0.10033 * Math.PI;
+        //public static final double MAX_VELOCITY_METERS_PER_SECOND = 6380.0 / 60.0 * ((14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0)) * 0.10033 * Math.PI;
+        public static final double MAX_VELOCITY_METERS_PER_SECOND = 5.0;
   
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_VELOCITY_METERS_PER_SECOND / Math.hypot(TRACKWIDTH_METERS / 2.0, WHEELBASE_METERS / 2.0);
   
@@ -99,21 +97,21 @@ public class Constants {
         public static final int FRONT_LEFT_DRIVE_MOTOR = 19; // Front left module drive motor ID
         public static final int FRONT_LEFT_STEER_MOTOR = 20; // Front left module steer motor ID
         public static final int FRONT_LEFT_STEER_ENCODER = 21; // Front left steer encoder ID
-        public static final double FRONT_LEFT_STEER_OFFSET = 0.3564453125; // Front left steer offset
+        public static final double FRONT_LEFT_STEER_OFFSET = -0.3564453125; // Front left steer offset
   
         public static final int FRONT_RIGHT_DRIVE_MOTOR = 14; // Front right drive motor ID
         public static final int FRONT_RIGHT_STEER_MOTOR = 13; // Front right steer motor ID
         public static final int FRONT_RIGHT_STEER_ENCODER = 15; // Front right steer encoder ID
-        public static final double FRONT_RIGHT_STEER_OFFSET = 0.190673828125; // Front right steer offset
+        public static final double FRONT_RIGHT_STEER_OFFSET = -0.190673828125; // Front right steer offset
   
         public static final int BACK_LEFT_DRIVE_MOTOR = 16; // Back left drive motor ID
         public static final int BACK_LEFT_STEER_MOTOR = 17; // Back left steer motor ID
         public static final int BACK_LEFT_STEER_ENCODER = 18; // Back left steer encoder ID 
-        public static final double BACK_LEFT_STEER_OFFSET = -0.2724609375; // Back left steer offset
+        public static final double BACK_LEFT_STEER_OFFSET = 0.2724609375; // Back left steer offset
   
         public static final int BACK_RIGHT_DRIVE_MOTOR = 10; // Back right drive motor ID
         public static final int BACK_RIGHT_STEER_MOTOR = 11; // Back right steer motor ID
         public static final int BACK_RIGHT_STEER_ENCODER = 12; // Back right steer encoder ID
-        public static final double BACK_RIGHT_STEER_OFFSET = 0.01220703125; // Back right steer offset
+        public static final double BACK_RIGHT_STEER_OFFSET = -0.01220703125; // Back right steer offset
     }
 }
