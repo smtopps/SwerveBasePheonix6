@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Commands;
+package frc.robot.commands;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -10,11 +10,12 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.Subsystems.PoseEstimator;
-import frc.robot.Subsystems.SwerveSubsystem;
+import frc.robot.subsystems.PoseEstimator;
+import frc.robot.subsystems.SwerveSubsystem;
 
 public class DriveWithJoysticks extends CommandBase {
 
@@ -37,9 +38,9 @@ public class DriveWithJoysticks extends CommandBase {
     this.rotation = rotation;
     this.relative = relative;
     this.maxSpeed = maxSpeed;
-    this.xLimiter = new SlewRateLimiter(2.0);
-    this.yLimiter = new SlewRateLimiter(2.0);
-    this.turnLimiter = new SlewRateLimiter(2.0);
+    this.xLimiter = new SlewRateLimiter(0.0);
+    this.yLimiter = new SlewRateLimiter(0.0);
+    this.turnLimiter = new SlewRateLimiter(0.0);
 
     addRequirements(swerveSubsystem);
   }
@@ -49,10 +50,13 @@ public class DriveWithJoysticks extends CommandBase {
 
   @Override
   public void execute() {
+    SmartDashboard.putNumber("Joy Y", translationX.getAsDouble());
+    SmartDashboard.putNumber("Joy X", translationY.getAsDouble());
+    SmartDashboard.putNumber("Joy Rot", rotation.getAsDouble());
     if(relative.getAsBoolean()){
       swerveSubsystem.drive(ChassisSpeeds.fromFieldRelativeSpeeds(
-      modifyAxis(translationY.getAsDouble(), maxSpeed.getAsDouble(), yLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,
-      modifyAxis(translationX.getAsDouble(), maxSpeed.getAsDouble(), xLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      modifyAxis(translationX.getAsDouble(), maxSpeed.getAsDouble(), yLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,
+      modifyAxis(translationY.getAsDouble(), maxSpeed.getAsDouble(), xLimiter) * SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND,
       modifyAxis(rotation.getAsDouble(), maxSpeed.getAsDouble(), turnLimiter) * SwerveConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
      poseEstimator.getPoseRotation()));
     } else {

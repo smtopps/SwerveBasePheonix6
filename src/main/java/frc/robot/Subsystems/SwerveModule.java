@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Subsystems;
+package frc.robot.subsystems;
 
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -10,16 +10,17 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.BetterSwerveModuleState;
 import frc.lib.SwerveModuleConstants;
 import frc.robot.Constants;
@@ -40,7 +41,8 @@ public class SwerveModule {
     private BaseStatusSignal[] signals;
 
     private PositionVoltage angleSetter = new PositionVoltage(0);
-    private VelocityTorqueCurrentFOC driveSetter = new VelocityTorqueCurrentFOC(0);
+    //private VelocityTorqueCurrentFOC driveSetter = new VelocityTorqueCurrentFOC(0);
+    private VelocityVoltage driveSetter = new VelocityVoltage(0);
 
     private SwerveModulePosition internalState = new SwerveModulePosition();
 
@@ -84,12 +86,12 @@ public class SwerveModule {
      * @param desiredState Desired velocity and angle of module
      * @param isOpenLoop If true it uses open loop control which sets the velocity using voltage. If false it uses closed loop which sets the velocity using a control method to vary motor power based on sensor velocity.
      */
-    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
-        var optimized = SwerveModuleState.optimize(desiredState, internalState.angle);
-
-        double angleToSetDeg = optimized.angle.getRotations();
-        angleMotor.setControl(angleSetter.withPosition(angleToSetDeg));
-        double velocityToSet = optimized.speedMetersPerSecond * ModuleConstants.rotationsPerMeter;
+    public void setDesiredState(SwerveModuleState desiredState){
+        desiredState = SwerveModuleState.optimize(desiredState, internalState.angle);
+        double angleToSet = desiredState.angle.getRotations();
+        angleMotor.setControl(angleSetter.withPosition(angleToSet));
+        double velocityToSet = desiredState.speedMetersPerSecond; //* ModuleConstants.rotationsPerMeter;
+        SmartDashboard.putNumber(String.valueOf(moduleNumber) + "Request", velocityToSet);
         driveMotor.setControl(driveSetter.withVelocity(velocityToSet));
     }
 
@@ -103,7 +105,7 @@ public class SwerveModule {
 
         double angleToSetDeg = optimized.angle.getRotations();
         angleMotor.setControl(angleSetter.withPosition(angleToSetDeg));
-        double velocityToSet = optimized.speedMetersPerSecond * ModuleConstants.rotationsPerMeter;
+        double velocityToSet = optimized.speedMetersPerSecond; //* ModuleConstants.rotationsPerMeter;
         driveMotor.setControl(driveSetter.withVelocity(velocityToSet));
     }
 
@@ -122,7 +124,7 @@ public class SwerveModule {
         angleEncoder.getConfigurator().apply(new CANcoderConfiguration());
         var angleEncoderConfigs = new CANcoderConfiguration();
         angleEncoderConfigs.MagnetSensor.MagnetOffset = angleOffset;
-        angleEncoderConfigs.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+        angleEncoderConfigs.MagnetSensor.SensorDirection = ModuleConstants.canCoderInvert;
         angleEncoderConfigs.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         angleEncoder.getConfigurator().apply(angleEncoderConfigs);
     }
@@ -145,12 +147,16 @@ public class SwerveModule {
         talonfxConfigs.CurrentLimits.SupplyTimeThreshold = ModuleConstants.anglePeakCurrentDuration;
         talonfxConfigs.Voltage.PeakForwardVoltage = 10;
         talonfxConfigs.Voltage.PeakReverseVoltage = -10;
-        talonfxConfigs.Feedback.FeedbackRemoteSensorID = cancoderID;
-        talonfxConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
-        talonfxConfigs.Feedback.RotorToSensorRatio = ModuleConstants.angleGearRatio;
-        talonfxConfigs.MotorOutput.NeutralMode = ModuleConstants.angleNeutralMode;
+        talonfxConfigs.Feedback.SensorToMechanismRatio = ModuleConstants.angleGearRatio;
+        //talonfxConfigs.Feedback.FeedbackRemoteSensorID = cancoderID;
+        //talonfxConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        //talonfxConfigs.Feedback.RotorToSensorRatio = ModuleConstants.angleGearRatio;
+        //talonfxConfigs.MotorOutput.NeutralMode = ModuleConstants.angleNeutralMode;
+        talonfxConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         talonfxConfigs.MotorOutput.Inverted = ModuleConstants.angleMotorInvert;
         angleMotor.getConfigurator().apply(talonfxConfigs);
+        Timer.delay(0.5);
+        angleMotor.setRotorPosition(angleEncoder.getAbsolutePosition().refresh().getValue());
     }
 
     /**
@@ -159,8 +165,8 @@ public class SwerveModule {
     private void configDriveMotor() {
         driveMotor.getConfigurator().apply(new TalonFXConfiguration());
         var talongfxConfigs = new TalonFXConfiguration();
-        talongfxConfigs.Slot0.kV = 0.0;
-        talongfxConfigs.Slot0.kS = 0.0;
+        talongfxConfigs.Slot0.kV = ModuleConstants.driveKV;
+        talongfxConfigs.Slot0.kS = ModuleConstants.driveKS;
         talongfxConfigs.Slot0.kP = ModuleConstants.driveKP;
         talongfxConfigs.Slot0.kI = ModuleConstants.driveKI;
         talongfxConfigs.Slot0.kD = ModuleConstants.driveKD;
@@ -170,6 +176,7 @@ public class SwerveModule {
         talongfxConfigs.CurrentLimits.SupplyTimeThreshold = ModuleConstants.drivePeakCurrentDuration;
         talongfxConfigs.MotorOutput.Inverted = ModuleConstants.driveMotorInvert;
         talongfxConfigs.MotorOutput.NeutralMode = ModuleConstants.driveNeutralMode;
+        talongfxConfigs.Feedback.SensorToMechanismRatio = ModuleConstants.rotationsPerMeter;
         driveMotor.getConfigurator().apply(talongfxConfigs);
         driveMotor.setRotorPosition(0.0);
     }
@@ -189,7 +196,7 @@ public class SwerveModule {
         double driveRotations = BaseStatusSignal.getLatencyCompensatedValue(drivePosition, driveVelocity);
         double angleRotations = BaseStatusSignal.getLatencyCompensatedValue(anglePosition, angleVelocity);
 
-        double distance = driveRotations / ModuleConstants.rotationsPerMeter;
+        double distance = driveRotations; // ModuleConstants.rotationsPerMeter;
         internalState.distanceMeters = distance;
         Rotation2d angle = Rotation2d.fromRotations(angleRotations);
         internalState.angle = angle;
@@ -208,5 +215,17 @@ public class SwerveModule {
 
     public BaseStatusSignal[] getSignals() {
         return signals;
+    }
+
+    public Rotation2d getEncoderAngle() {
+        return Rotation2d.fromRotations(angleEncoder.getAbsolutePosition().refresh().getValue());
+    }
+
+    public Rotation2d getMotorAngle() {
+        return Rotation2d.fromRotations(angleMotor.getPosition().refresh().getValue());
+    }
+
+    public double getMotorSpeed() {
+        return driveMotor.getVelocity().refresh().getValue();
     }
 }

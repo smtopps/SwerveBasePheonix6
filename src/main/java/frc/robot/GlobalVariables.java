@@ -7,7 +7,4 @@ package frc.robot;
 public class GlobalVariables {
     public static double maxSpeed = Constants.DRIVE_SPEED;
     public static boolean fieldRelative = true;
-    public static boolean isBlue = true;
-    public static boolean hasConnectedToDS = false;
-    public static double pigeonPitch = 0.0;
 }

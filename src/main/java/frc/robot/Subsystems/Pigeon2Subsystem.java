@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Subsystems;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
@@ -46,6 +46,7 @@ public class Pigeon2Subsystem extends SubsystemBase {
 
   /**
    * getGyroRotation - this is the Yaw value (rotate around...)
+   * @param refresh Is new data needed or has the data already been updated this loop
    * @return Rotation2d
    */
   public Rotation2d getGyroRotation(boolean refresh) {
@@ -78,7 +79,8 @@ public class Pigeon2Subsystem extends SubsystemBase {
 
   /**
    * getPigeonYaw - this is the Yaw value (rotate around...)
-   * @return double
+   * @param refresh Is new data needed or has the data already been updated this loop
+   * @return double representing angle in degrees
    */
   public double getPigeonYaw(boolean refresh){
     if(refresh){
@@ -90,6 +92,10 @@ public class Pigeon2Subsystem extends SubsystemBase {
     return yawRotation;
   }
 
+  /**
+   * getSignals - signals for pigeon yaw and yaw angular velocity. This gives control of the updates and is used for synchronous updates
+   * @return BaseStatusSignal[] of yaw and yaw angular velocity
+   */
   public BaseStatusSignal[] getSignals() {
     return signals;
   }

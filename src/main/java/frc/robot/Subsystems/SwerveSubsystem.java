@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Subsystems;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 
@@ -12,6 +12,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.BetterSwerveKinematics;
 import frc.lib.BetterSwerveModuleState;
@@ -50,7 +51,7 @@ public class SwerveSubsystem extends SubsystemBase {
       SwerveConstants.BACK_RIGHT_STEER_OFFSET))
     };
 
-    signals = new BaseStatusSignal[15];
+    signals = new BaseStatusSignal[16];
     for(int i = 0; i<4; i++) {
       BaseStatusSignal[] tempSignals = swerveModules[i].getSignals();
       signals[i*4+0] = tempSignals[0];
@@ -61,7 +62,17 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    SmartDashboard.putNumber("Speed", swerveModules[0].getMotorSpeed());
+    SmartDashboard.putNumber("FL", swerveModules[0].getEncoderAngle().getRotations());
+    SmartDashboard.putNumber("FR", swerveModules[1].getEncoderAngle().getRotations());
+    SmartDashboard.putNumber("BL", swerveModules[2].getEncoderAngle().getRotations());
+    SmartDashboard.putNumber("BR", swerveModules[3].getEncoderAngle().getRotations());
+    SmartDashboard.putNumber("FLM", swerveModules[0].getMotorAngle().getRotations());
+    SmartDashboard.putNumber("FRM", swerveModules[1].getMotorAngle().getRotations());
+    SmartDashboard.putNumber("BLM", swerveModules[2].getMotorAngle().getRotations());
+    SmartDashboard.putNumber("BRM", swerveModules[3].getMotorAngle().getRotations());
+  }
 
   /**
    * Main controlling method for driving swerve based on desired speed of drivetrian
@@ -69,6 +80,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void drive(ChassisSpeeds chassisSpeeds) {
     SwerveModuleState[] states = SwerveConstants.KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+    SmartDashboard.putNumber("FLangle", states[0].angle.getRotations());
     setModuleStates(states);
   }
 
@@ -87,10 +99,10 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void setModuleStates(SwerveModuleState[] states){
     SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND);
-    swerveModules[0].setDesiredState(states[0], true);
-    swerveModules[1].setDesiredState(states[1], true);
-    swerveModules[2].setDesiredState(states[2], true); 
-    swerveModules[3].setDesiredState(states[3], true); 
+    swerveModules[0].setDesiredState(states[0]);
+    swerveModules[1].setDesiredState(states[1]);
+    swerveModules[2].setDesiredState(states[2]); 
+    swerveModules[3].setDesiredState(states[3]); 
   }
 
   /**
@@ -99,10 +111,10 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public void betterSetModuleStates(BetterSwerveModuleState[] states){
     BetterSwerveKinematics.desaturateWheelSpeeds(states, SwerveConstants.MAX_VELOCITY_METERS_PER_SECOND);
-    swerveModules[0].setDesiredState(states[0], true);
-    swerveModules[1].setDesiredState(states[1], true);
-    swerveModules[2].setDesiredState(states[2], true); 
-    swerveModules[3].setDesiredState(states[3], true); 
+    swerveModules[0].setDesiredState(states[0]);
+    swerveModules[1].setDesiredState(states[1]);
+    swerveModules[2].setDesiredState(states[2]); 
+    swerveModules[3].setDesiredState(states[3]); 
   }
 
   /**
@@ -119,10 +131,10 @@ public class SwerveSubsystem extends SubsystemBase {
    * Rotates modules in an X shape which makes it hard to push
    */
   public void lock(){
-    swerveModules[0].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45)), false);
-    swerveModules[1].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45)), false);
-    swerveModules[2].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45)), false);
-    swerveModules[3].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45)), false);
+    swerveModules[0].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45)));
+    swerveModules[1].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45)));
+    swerveModules[2].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(-45)));
+    swerveModules[3].setDesiredState(new SwerveModuleState(0.0, Rotation2d.fromDegrees(45)));
   }
 
   /**
@@ -146,27 +158,31 @@ public class SwerveSubsystem extends SubsystemBase {
    * Get the state of all the modules including velocity and angle of each
    * @return The state of all the modules as an array
    */
-  public SwerveModuleState[] getStates() {
+  public SwerveModuleState[] getStates(boolean refresh) {
     return new SwerveModuleState[] {
-      swerveModules[0].getState(true), swerveModules[1].getState(true), swerveModules[2].getState(true), swerveModules[3].getState(true)
+      swerveModules[0].getState(refresh),
+      swerveModules[1].getState(refresh),
+      swerveModules[2].getState(refresh),
+      swerveModules[3].getState(refresh)
     };
   }
 
   /**
    * @return the current speed of the robot in whatever direction it is traveling
    */
-  public double getCurrentChassisSpeeds() {
-    ChassisSpeeds currentSpeeds = SwerveConstants.KINEMATICS.toChassisSpeeds(this.getStates());
+  public double getCurrentChassisSpeeds(boolean refresh) {
+    ChassisSpeeds currentSpeeds = SwerveConstants.KINEMATICS.toChassisSpeeds(this.getStates(refresh));
     double linearVelocity = Math.sqrt((currentSpeeds.vxMetersPerSecond * currentSpeeds.vxMetersPerSecond) + (currentSpeeds.vyMetersPerSecond * currentSpeeds.vyMetersPerSecond));
     return linearVelocity;
   }
 
   /**
    * @param currentPose of the robot from the pose estimator
+   * @param refresh 
    * @return the current direction the robot is traveling in
    */
-  public Rotation2d getCurrentChassisHeading(Pose2d currentPose) {
-    ChassisSpeeds currentSpeeds = SwerveConstants.KINEMATICS.toChassisSpeeds(this.getStates());
+  public Rotation2d getCurrentChassisHeading(Pose2d currentPose, boolean refresh) {
+    ChassisSpeeds currentSpeeds = SwerveConstants.KINEMATICS.toChassisSpeeds(this.getStates(refresh));
     Rotation2d robotHeading = new Rotation2d(Math.atan2(currentSpeeds.vyMetersPerSecond, currentSpeeds.vxMetersPerSecond));
     Rotation2d currentHeading = robotHeading.plus(currentPose.getRotation());
     return currentHeading;

@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.Subsystems;
+package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 
@@ -37,8 +37,8 @@ public class PoseEstimator extends SubsystemBase {
   private final Field2d field2d = new Field2d();
 
   private BaseStatusSignal[] signals;
-  public int SuccessfulDaqs = 0;
-  public int FailedDaqs = 0;
+  //public int SuccessfulDaqs = 0;
+  //public int FailedDaqs = 0;
 
   //private LinearFilter lowpass = LinearFilter.movingAverage(50);
   //private double lastTime = 0;
@@ -59,17 +59,20 @@ public class PoseEstimator extends SubsystemBase {
 
     SmartDashboard.putData("Field", field2d);
 
-    signals = new BaseStatusSignal[17];
-    signals = swerveSubsystem.getSignals();
-    BaseStatusSignal[] tempSignals = pigeon2Subsystem.getSignals();
-    signals[16] = tempSignals[0];
-    signals[17] = tempSignals[1];
+    signals = new BaseStatusSignal[18];
+    BaseStatusSignal[] swerveSignals = swerveSubsystem.getSignals();
+    for(int i = 0; i<16; i++){
+      signals[i] = swerveSignals[i];
+    }
+    BaseStatusSignal[] pigeon2Signals = pigeon2Subsystem.getSignals();
+    signals[16] = pigeon2Signals[0];
+    signals[17] = pigeon2Signals[1];
   }
 
   @Override
   public void periodic() {
     //var status = BaseStatusSignal.waitForAll(0.1, signals);
-    BaseStatusSignal.waitForAll(0.1, signals);
+    //BaseStatusSignal.waitForAll(0.1, signals);
     /*lastTime = currentTime;
     currentTime = Utils.getCurrentTimeSeconds();
     averageLoopTime = lowpass.calculate(currentTime - lastTime);
@@ -81,7 +84,7 @@ public class PoseEstimator extends SubsystemBase {
         FailedDaqs++;
     }*/
 
-    poseEstimator.updateWithTime(Timer.getFPGATimestamp(), pigeon2Subsystem.getGyroRotation(false), swerveSubsystem.getPositions(false));
+    poseEstimator.updateWithTime(Timer.getFPGATimestamp(), pigeon2Subsystem.getGyroRotation(true), swerveSubsystem.getPositions(true));
     field2d.setRobotPose(poseEstimator.getEstimatedPosition());
   }
 
